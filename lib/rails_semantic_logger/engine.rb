@@ -143,7 +143,7 @@ module RailsSemanticLogger
         # Active Job
         if defined?(::ActiveJob)
           RailsSemanticLogger.swap_subscriber(
-            ::ActiveJob::Logging::LogSubscriber,
+            ::ActiveJob::LogSubscriber,
             RailsSemanticLogger::ActiveJob::LogSubscriber,
             :active_job
           )
