@@ -170,12 +170,16 @@ module RailsSemanticLogger
         end
 
         # Action View
-        RailsSemanticLogger::ActionView::LogSubscriber.rendered_log_level = :info if config.rails_semantic_logger.rendered
-        RailsSemanticLogger.swap_subscriber(
-          ::ActionView::LogSubscriber,
-          RailsSemanticLogger::ActionView::LogSubscriber,
-          :action_view
-        )
+        if defined?(::ActionView)
+          require "action_view/log_subscriber"
+          
+          RailsSemanticLogger::ActionView::LogSubscriber.rendered_log_level = :info if config.rails_semantic_logger.rendered
+          RailsSemanticLogger.swap_subscriber(
+            ::ActionView::LogSubscriber,
+            RailsSemanticLogger::ActionView::LogSubscriber,
+            :action_view
+          )
+        end
 
         # Action Controller
         RailsSemanticLogger.swap_subscriber(
