@@ -52,7 +52,7 @@ module RailsSemanticLogger
 
       # When multiple values are received for a single bound field, it is converted into an array
       def add_bind_value(binds, key, value)
-        key        = key.downcase.to_sym
+        key        = key&.downcase&.to_sym
         value      = (Array(binds[key]) << value) if binds.key?(key)
         binds[key] = value
       end
@@ -154,6 +154,21 @@ module RailsSemanticLogger
         [attr&.name, value]
       end
 
+      def render_bind_v6_1_0(attr, value)
+        case attr
+        when ActiveModel::Attribute
+          if attr.type.binary? && attr.value
+            value = "<#{attr.value_for_database.to_s.bytesize} bytes of binary data>"
+          end
+        when Array
+          attr = attr.first
+        else
+          attr = nil
+        end
+
+        [attr&.name, value]
+      end
+
       def type_casted_binds_v5_0_3(binds, casted_binds)
         casted_binds || ::ActiveRecord::Base.connection.type_casted_binds(binds)
       end
@@ -171,6 +186,10 @@ module RailsSemanticLogger
         alias bind_values bind_values_v5_0_3
         alias render_bind render_bind_v5_0_3
         alias type_casted_binds type_casted_binds_v5_0_3
+      elsif Rails::VERSION::MAJOR == 6 && Rails::VERSION::MINOR == 1 # 6.1.0
+        alias bind_values bind_values_v5_1_5
+        alias render_bind render_bind_v6_1_0
+        alias type_casted_binds type_casted_binds_v5_1_5
       elsif Rails::VERSION::MAJOR >= 5 # ~> 5.1.5 && ~> 5.0.7 && 6.x.x
         alias bind_values bind_values_v5_1_5
         alias render_bind render_bind_v5_0_3
